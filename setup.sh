@@ -19,7 +19,11 @@ function show_loading() {
 # Install Python
 echo "Installing Python $python_version"
 python_installer="python-installer.exe"
-wget "https://www.python.org/ftp/python/$python_version/python-$python_version-amd64.exe" -O "$python_installer" & show_loading
+
+# Download Python installer using curl
+curl -o "$python_installer" "https://www.python.org/ftp/python/$python_version/python-$python_version-amd64.exe" && show_loading
+
+# Run the Python installer silently
 "$python_installer" /quiet
 
 # Install pip (ensurepip)
@@ -28,10 +32,10 @@ python -m ensurepip --default-pip & show_loading
 
 # Clone a GitHub project
 echo "Cloning a GitHub project"
-git clone https://github.com/yourusername/yourproject.git & show_loading
+git clone https://github.com/Konsa-College/UPTU-IPU-Choice-Filling-Automation-Setup.git & show_loading
 
 # Navigate to the Git repository directory
-cd yourproject
+cd UPTU-IPU-Choice-Filling-Automation-Setup
 
 # Install Libraries from requirements.txt
 echo "Installing libraries from requirements.txt"
