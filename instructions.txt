@@ -1,0 +1,54 @@
+Setting Up UPTU-IPU Choice Filling Automation Software
+
+Follow these steps to set up and run the UPTU-IPU Choice Filling Automation Script:
+
+Requirements
+- Windows operating system.
+- Google Chrome installed and logged in.
+- A stable internet connection.
+- Git and Python installation via the Microsoft Store. If not, the code will open Microsoft Store and Windows Package Manager to install it for you.
+
+Instructions
+
+1. Download the Script:
+   - Download the batch script install.bat to your computer.
+
+2. Edit Python Version (Optional):
+   - Not recommended.
+   - Open the batch script in a text editor.
+   - Optionally, modify the python_version variable to specify the desired Python version. The default is set to 3.10.0.
+
+3. Run the Script:
+   - Right-click on the batch script (install.bat) and select "Run as administrator".
+
+4. Follow the Instructions:
+   - The script will execute and provide instructions in the Command Prompt window.
+   - If Python is not installed, it will prompt you to install it from the Microsoft Store.
+   - If Git is not installed, it will install it using the Windows Package Manager (winget).
+
+5. Cloning GitHub Repository:
+   - The script will clone the GitHub repository named UPTU-IPU-Choice-Filling-Automation-Setup to your computer.
+   - This repository contains all the information the automation scripts.
+
+6. Interactive Command Prompt:
+   - A new Command Prompt window will open within the cloned repository directory (UPTU-IPU-Choice-Filling-Automation-Setup).
+   - You can make changes to files in this directory, such as updating the .csv file, saving it, and closing it.
+     - Note: You are supposed to update the choices in the *.csv file right away with correct serial no., college name and corresponding branch name for code to run correctly.
+
+7. Automated Actions:
+   - The script will automatically execute the following tasks:
+     - Ensure that choice_filling.csv is opened.
+     - Install pip and required libraries from requirements.txt.
+     - Run the main.py script (once).
+         - In order to run this multiple times, simply run "python main.py" in your command prompt in same folder.
+
+8. Script Completion:
+   - Once the script and associated tasks are completed, it will display "Script completed."
+
+9. Script Output:
+   - If Python or Git installations were needed, they will be displayed.
+   - Any errors during installation will be reported.
+
+10. Exit Installation:
+    - The script will pause to keep the Command Prompt window open.
+    - You can press any key to exit the script and close the Command Prompt window.
