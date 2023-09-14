@@ -161,7 +161,7 @@ def main():
     :return: The main function is returning an integer value of 0.
     """
 
-    target_url = "https://ipu.admissions.nic.in/"
+    target_url = "https://uptac.admissions.nic.in/"
     desired_url = "https://admissions.nic.in/IPUADM/Applicant/Choice/ChoiceFilling.aspx"
 
     # You can add your college and branch data to this list
