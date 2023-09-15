@@ -68,30 +68,75 @@ def find_tab_by_url(driver, desired_url):
         return False
 
 
+# def iterate_table_and_click_add(driver, college_list):
+#     """
+#     The function iterates through a table on a web page, finds a specific college and branch, and clicks
+#     the "Add" button for that row.
+
+#     :param driver: The `driver` parameter is an instance of a Selenium WebDriver. It is used to interact
+#     with the web page and perform actions such as finding elements and clicking buttons
+#     :param college_list: college_list is a list of tuples where each tuple contains the name of a
+#     college and the name of a branch. For example, it could be [("College A", "Branch 1"), ("College B",
+#     "Branch 2"), ("College C", "Branch 3")]
+#     """
+#     try:
+#         # Wait for the table to be present
+#         WebDriverWait(driver, 10).until(
+#             EC.presence_of_element_located((By.CSS_SELECTOR, "#avlChoiceContainer"))
+#         )
+
+#         for cl in college_list:
+#             serial, college, branch = cl
+#             found = False  # Flag to track if the pair is found
+
+#             rows = driver.find_elements(By.CSS_SELECTOR, "#avlChoiceContainer tr")
+
+#             for row in rows[1:]:  # Skip the header row
+
+#                 cells = row.find_elements(By.TAG_NAME, "td")
+#                 inst_name = cells[1].text
+#                 br_name = cells[3].text
+
+#                 if college in inst_name and branch in br_name:
+
+#                     add_button = row.find_element(By.CSS_SELECTOR, "input[value='Add']")
+#                     add_button.click()
+
+#                     found = True  # Set the flag to True
+
+#                     print(f"{serial}. Clicked 'Add' for {college} - [{branch}]")
+#                     break
+
+#                 if not found:
+#                     print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
+
+
+#     except Exception as e:
+#         print(f"Error in iterate_table_and_click_add: {str(e)}")
+
 def iterate_table_and_click_add(driver, college_list):
     """
-    The function iterates through a table on a web page, finds a specific college and branch, and clicks
-    the "Add" button for that row.
-
-    :param driver: The `driver` parameter is an instance of a Selenium WebDriver. It is used to interact
-    with the web page and perform actions such as finding elements and clicking buttons
-    :param college_list: college_list is a list of tuples where each tuple contains the name of a
-    college and the name of a branch. For example, it could be [("College A", "Branch 1"), ("College B",
-    "Branch 2"), ("College C", "Branch 3")]
+    The function iterates through a table on a web page, searches for a specific college and branch, and
+    clicks the "Add" button if found.
+    
+    :param driver: The `driver` parameter is an instance of a web driver, such as Selenium's WebDriver,
+    that is used to interact with a web page
+    :param college_list: The college_list parameter is a list of tuples. Each tuple contains three
+    elements:
     """
     try:
         # Wait for the table to be present
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "#avlChoiceContainer"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#avlChoiceContainer tbody tr"))
         )
 
         for cl in college_list:
             serial, college, branch = cl
             found = False  # Flag to track if the pair is found
 
-            rows = driver.find_elements(By.CSS_SELECTOR, "#avlChoiceContainer tr")
+            rows = driver.find_elements(By.CSS_SELECTOR, "#avlChoiceContainer tbody tr")
 
-            for row in rows[1:]:  # Skip the header row
+            for row in rows:  # No need to skip the header row in this structure
 
                 cells = row.find_elements(By.TAG_NAME, "td")
                 inst_name = cells[1].text
@@ -107,9 +152,8 @@ def iterate_table_and_click_add(driver, college_list):
                     print(f"{serial}. Clicked 'Add' for {college} - [{branch}]")
                     break
 
-                if not found:
-                    print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
-
+            if not found:
+                print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
 
     except Exception as e:
         print(f"Error in iterate_table_and_click_add: {str(e)}")
@@ -162,7 +206,7 @@ def main():
     """
 
     target_url = "https://uptac.admissions.nic.in/"
-    desired_url = "https://admissions.nic.in/IPUADM/Applicant/Choice/ChoiceFilling.aspx"
+    desired_url = "https://admissions.nic.in/UPTAC/Applicant/Choice/ChoiceFilling.aspx"
 
     # You can add your college and branch data to this list
     csv_file_path = "choice_filling.csv"
