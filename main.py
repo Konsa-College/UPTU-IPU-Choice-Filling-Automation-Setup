@@ -18,7 +18,7 @@ def send_notification(title, message):
 def open_chrome_tab_with_debugging(url):
     """
     The function opens a new Chrome tab with debugging enabled and navigates to the specified URL.
-    
+
     :param url: The `url` parameter is the URL of the webpage that you want to open in a new Chrome tab
     for debugging
     :return: a WebDriver object if it is successfully initialized, or None if there is an error.
@@ -40,7 +40,7 @@ def find_tab_by_url(driver, desired_url):
     The function `find_tab_by_url` takes a Selenium WebDriver instance and a desired URL as input, and
     switches to the tab that contains the desired URL if it exists, returning True if successful and
     False otherwise.
-    
+
     :param driver: The "driver" parameter is an instance of a web driver, such as Selenium's WebDriver,
     that is used to control the web browser. It allows you to interact with the web page, navigate
     between different pages, and perform various actions
@@ -67,58 +67,11 @@ def find_tab_by_url(driver, desired_url):
         print(f"Error while switching tabs: {str(e)}")
         return False
 
-
-# def iterate_table_and_click_add(driver, college_list):
-#     """
-#     The function iterates through a table on a web page, finds a specific college and branch, and clicks
-#     the "Add" button for that row.
-
-#     :param driver: The `driver` parameter is an instance of a Selenium WebDriver. It is used to interact
-#     with the web page and perform actions such as finding elements and clicking buttons
-#     :param college_list: college_list is a list of tuples where each tuple contains the name of a
-#     college and the name of a branch. For example, it could be [("College A", "Branch 1"), ("College B",
-#     "Branch 2"), ("College C", "Branch 3")]
-#     """
-#     try:
-#         # Wait for the table to be present
-#         WebDriverWait(driver, 10).until(
-#             EC.presence_of_element_located((By.CSS_SELECTOR, "#avlChoiceContainer"))
-#         )
-
-#         for cl in college_list:
-#             serial, college, branch = cl
-#             found = False  # Flag to track if the pair is found
-
-#             rows = driver.find_elements(By.CSS_SELECTOR, "#avlChoiceContainer tr")
-
-#             for row in rows[1:]:  # Skip the header row
-
-#                 cells = row.find_elements(By.TAG_NAME, "td")
-#                 inst_name = cells[1].text
-#                 br_name = cells[3].text
-
-#                 if college in inst_name and branch in br_name:
-
-#                     add_button = row.find_element(By.CSS_SELECTOR, "input[value='Add']")
-#                     add_button.click()
-
-#                     found = True  # Set the flag to True
-
-#                     print(f"{serial}. Clicked 'Add' for {college} - [{branch}]")
-#                     break
-
-#                 if not found:
-#                     print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
-
-
-#     except Exception as e:
-#         print(f"Error in iterate_table_and_click_add: {str(e)}")
-
 def iterate_table_and_click_add(driver, college_list):
     """
     The function iterates through a table on a web page, searches for a specific college and branch, and
     clicks the "Add" button if found.
-    
+
     :param driver: The `driver` parameter is an instance of a web driver, such as Selenium's WebDriver,
     that is used to interact with a web page
     :param college_list: The college_list parameter is a list of tuples. Each tuple contains three
@@ -127,30 +80,32 @@ def iterate_table_and_click_add(driver, college_list):
     try:
         # Wait for the table to be present
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "#avlChoiceContainer tbody tr"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "#avlChoiceContainer"))
         )
 
         for cl in college_list:
             serial, college, branch = cl
+
             found = False  # Flag to track if the pair is found
 
-            rows = driver.find_elements(By.CSS_SELECTOR, "#avlChoiceContainer tbody tr")
+            rows = driver.find_elements(By.CSS_SELECTOR, "#avlChoiceContainer tr")
 
             for row in rows:  # No need to skip the header row in this structure
-
                 cells = row.find_elements(By.TAG_NAME, "td")
-                inst_name = cells[1].text
-                br_name = cells[3].text
+                if len(cells) >= 4:  # Check if there are enough cells in the row
+                    inst_name = cells[1].text
+                    br_name = cells[3].text
 
-                if college in inst_name and branch in br_name:
+                    if college in inst_name and branch in br_name:
+                        add_button = row.find_element(
+                            By.CSS_SELECTOR, "input[value='Add']"
+                        )
+                        add_button.click()
 
-                    add_button = row.find_element(By.CSS_SELECTOR, "input[value='Add']")
-                    add_button.click()
+                        found = True  # Set the flag to True
 
-                    found = True  # Set the flag to True
-
-                    print(f"{serial}. Clicked 'Add' for {college} - [{branch}]")
-                    break
+                        print(f"{serial}. Clicked 'Add' for {college} - [{branch}]")
+                        break
 
             if not found:
                 print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
@@ -163,7 +118,7 @@ def read_colleges_from_csv(file_path):
     """
     The function reads data from a CSV file and returns a list of colleges with their serial numbers,
     names, and branches.
-    
+
     :param file_path: The file path is the location of the CSV file that you want to read. It should be
     a string that specifies the path to the file on your computer. For example,
     "C:/Users/username/Documents/colleges.csv"
@@ -183,11 +138,12 @@ def read_colleges_from_csv(file_path):
         print(f"Error reading CSV file: {str(e)}")
     return college_list
 
+
 def countdown_timer(countdown):
     """
     The function `countdown_timer` takes an input `countdown` and prints a countdown from that number to
     1, then prints "Starting tasks now!".
-    
+
     :param countdown: The parameter "countdown" is the number of seconds to count down from before
     starting the tasks
     """
@@ -210,6 +166,12 @@ def main():
 
     # You can add your college and branch data to this list
     csv_file_path = "choice_filling.csv"
+    if input("Is the candidate eligible for Fee Wavier? (no/yes): ").lower() == "yes":
+        csv_file_path = "choice_filling_fw.csv"
+        print("Using FW Sheet")
+    else:
+        csv_file_path = "choice_filling.csv"
+        print("Using Non-FW Sheet")
 
     # Read the list of colleges from the CSV file
     college_list = read_colleges_from_csv(csv_file_path)
