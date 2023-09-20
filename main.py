@@ -6,13 +6,19 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import pandas as pd
 
+TARGET_URL = "https://uptac.admissions.nic.in/"
+DESIRED_URL = "https://admissions.nic.in/UPTAC/Applicant/Choice/ChoiceFilling.aspx"
+CSV_FILE_PATH_FW = "choice_filling_fw.csv"
+CSV_FILE_PATH_NON_FW = "choice_filling.csv"
+
 
 def send_notification(title, message):
     """
     Sends a notification with a given title and message.
+    Also plays a sound notification.
     """
     toaster = ToastNotifier()
-    toaster.show_toast(title, message, duration=10)
+    toaster.show_toast(title, message, duration=10, sound=True)
 
 
 def open_chrome_tab_with_debugging(url):
@@ -67,6 +73,7 @@ def find_tab_by_url(driver, desired_url):
         print(f"Error while switching tabs: {str(e)}")
         return False
 
+
 def iterate_table_and_click_add(driver, college_list):
     """
     The function iterates through a table on a web page, searches for a specific college and branch, and
@@ -96,22 +103,38 @@ def iterate_table_and_click_add(driver, college_list):
                     inst_name = cells[1].text
                     br_name = cells[3].text
 
-                    if college in inst_name and branch in br_name:
-                        add_button = row.find_element(
-                            By.CSS_SELECTOR, "input[value='Add']"
-                        )
+                    if college == inst_name and branch == br_name:
+
+                    try:
+                        try:
+                            # Wait for the 'Add' button to be present in the row
+                            add_button = WebDriverWait(row, 10).until(
+                                EC.presence_of_element_located((By.CSS_SELECTOR, "input[value='Add']"))
+                            )
+                        except TimeoutException:
+                            # Send a notification if the 'Add' button is not available within the specified time
+                            send_notification("Action Required", "The 'Add' button is not available. Please check the webpage.")
+                            raise
+
+                        # Click the 'Add' button
                         add_button.click()
 
-                        found = True  # Set the flag to True
+                        # Set the flag to True indicating that the 'Add' button has been clicked
+                        is_button_clicked = True
 
-                        print(f"{serial}. Clicked 'Add' for {college} - [{branch}]")
+                        print(f"Serial No. {serial}. Successfully clicked 'Add' for {college} - [{branch}]")
                         break
 
-            if not found:
-                print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
+                    except Exception as e:
+                        # Print an error message if the 'Add' button is not found or not accessible
+                        print(f"Unable to access the 'Add' button for {college} - [{branch}]. Please ensure that the webpage is loaded correctly. Error: {str(e)}")
+                        continue
 
-    except Exception as e:
-        print(f"Error in iterate_table_and_click_add: {str(e)}")
+                                if not found:
+                                    print(f"S.No. - {serial} SKIPPED [{college}] - [{branch}]")
+
+                        except Exception as e:
+                            print(f"Error in iterate_table_and_click_add: {str(e)}")
 
 
 def read_colleges_from_csv(file_path):
@@ -161,62 +184,65 @@ def main():
     :return: The main function is returning an integer value of 0.
     """
 
-    target_url = "https://uptac.admissions.nic.in/"
-    desired_url = "https://admissions.nic.in/UPTAC/Applicant/Choice/ChoiceFilling.aspx"
-
-    # You can add your college and branch data to this list
-    csv_file_path = "choice_filling.csv"
-    if input("Is the candidate eligible for Fee Wavier? (no/yes): ").lower() == "yes":
-        csv_file_path = "choice_filling_fw.csv"
-        print("Using FW Sheet")
-    else:
+    try:
+        # You can add your college and branch data to this list
         csv_file_path = "choice_filling.csv"
-        print("Using Non-FW Sheet")
-
-    # Read the list of colleges from the CSV file
-    college_list = read_colleges_from_csv(csv_file_path)
-
-    # Open a new Chrome tab with debugging
-    driver = open_chrome_tab_with_debugging(target_url)
-
-    # Find and switch to the desired tab
-    find_desired_url = input("Have you logged in succesfully? (yes/no): ").lower()
-
-    if find_desired_url:
-        if not find_tab_by_url(driver, desired_url):
-            print("Desired URL not found in any open tabs.")
-            return
-
-        start_tasks = input("Do you want to start the tasks? (yes/no): ").lower()
-
-        if start_tasks == "yes":
-            countdown = 4
-            countdown_timer(countdown)
-
-            # Perform table iteration and clicking on "Add" buttons
-            iterate_table_and_click_add(driver, college_list)
-
-            send_notification(
-                "Choice Filling Task Completed",
-                "All choices are filled now. The automation task has been completed.",
-            )
-
-            if input("Do you want to CLOSE this tasks? (no/yes): ").lower() == "yes":
-                return 0
-            else:
-                print("Close Chrome Window Manually")
-                print("Close Terminal Manually")
-                while True:
-                    print("-", end="")
-
+        if input("Is the candidate eligible for Fee Wavier? (no/yes): ").lower() == "yes":
+            csv_file_path = CSV_FILE_PATH_FW
+            print("Using FW Sheet")
         else:
-            print("Tasks not started.")
-            send_notification(
-                "Task Failed",
-                "Error Occurred! This automation task has not been completed.",
-            )
-            return 0
+            csv_file_path = CSV_FILE_PATH_NON_FW
+            print("Using Non-FW Sheet")
 
+        # Read the list of colleges from the CSV file
+        college_list = read_colleges_from_csv(csv_file_path)
+
+        # Open a new Chrome tab with debugging
+        driver = open_chrome_tab_with_debugging(TARGET_URL)
+
+        # Find and switch to the desired tab
+        find_desired_url = input("Have you logged in succesfully? (yes/no): ").lower()
+
+        if find_desired_url:
+            if not find_tab_by_url(driver, DESIRED_URL):
+                print("Desired URL not found in any open tabs.")
+                return
+
+            while True:
+                start_tasks = input("Do you want to start the tasks? (yes/no): ").lower()
+
+                if start_tasks == "yes":
+                    countdown = 4
+                    countdown_timer(countdown)
+
+                    # Perform table iteration and clicking on "Add" buttons
+                    iterate_table_and_click_add(driver, college_list)
+
+                    send_notification(
+                        "Choice Filling Task Completed",
+                        "All choices are filled now. The automation task has been completed.",
+                    )
+
+                    if input("Do you want to CLOSE this tasks? (no/yes): ").lower() == "yes":
+                        return 0
+                    else:
+                        print("Close Chrome Window Manually")
+                        print("Close Terminal Manually")
+                        while True:
+                            print("-", end="")
+
+                else:
+                    print("Tasks not started.")
+                    send_notification(
+                        "Task Failed",
+                        "Error Occurred! This automation task has not been completed.",
+                    )
+                    return 0
+
+    except Exception as e:
+        # Handle exceptions gracefully, e.g., log them
+        print("Main function broke! Now you need to restart!")
+        print(f"Error in main: {str(e)}")
 
 if __name__ == "__main__":
     main()
